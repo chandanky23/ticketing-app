@@ -15,13 +15,14 @@ router.post(
   (req: Request, res: Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-      return res.status(400).send(errors.array())
+      throw new Error('Invalid email or password')
     }
 
     const { email, password } = req.body
     console.log("Creating a user...")
+    throw new Error('Database connection error')
     res.status(201).send({})
-  }
+  } 
 )
 
 export { router as signUpRouter }
