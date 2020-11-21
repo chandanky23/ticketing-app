@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { Password } from '../services/password'
 
 interface UserProps {
   email: string
@@ -23,6 +24,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   }
+})
+
+// Per-save hooks for password
+userSchema.pre('save', async function(done) {
+  if(this.isModified('password')) {
+    const hashed = await Password.hash(this.get('password'))
+    this.set('password', hashed)
+  }
+  done()
 })
 
 // Ading method to a schema in mongoose using 'statics'
