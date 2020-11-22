@@ -2,6 +2,7 @@ import express from "express"
 import 'express-async-errors'
 import { json } from "body-parser"
 import mongoose from 'mongoose'
+import cookieSession from 'cookie-session'
 
 import { currentUserRouter } from "./routes/currentUser"
 import { signInRouter } from "./routes/siginin"
@@ -11,7 +12,15 @@ import { errorHandler } from './middlewares/error-handler'
 import { NotFoundError } from './errors/not-found-error'
 
 const app = express()
+// We want express to trust our proxy coming over ingress-nginx using HTTPS
+app.set('trust proxy', true)
 app.use(json())
+app.use(
+  cookieSession({
+    signed: false,
+    secure: true // Must be on HTTPS.
+  })
+)
 
 app.use(currentUserRouter)
 app.use(signInRouter)
@@ -26,6 +35,9 @@ app.use(errorHandler)
 
 // Connection to mongodb, db name is defined in srv file in k8s , i.e, auth-mongo-depl.yaml
 const start = async () => {
+  if(!process.env.JWT_KEY) {
+    throw new Error('JWT_KEY must be defined')
+  }
   try{
     await mongoose.connect('mongodb://auth-mongo-srv:27017/auth', {
       useNewUrlParser: true,
