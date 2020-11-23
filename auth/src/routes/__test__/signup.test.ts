@@ -10,3 +10,64 @@ it("returns a 201 on successfull signup", async () => {
     })
     .expect(201)
 })
+
+it("returns a 400 status code with an invalid email", () => {
+  return request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test",
+      password: "password",
+    })
+    .expect(400)
+})
+
+it("returns a 400 status code with an invalid password", () => {
+  return request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test@test.com",
+      password: "1",
+    })
+    .expect(400)
+})
+
+it("returns a 400 status code with missing email or password", async () => {
+  await request(app)
+    .post("/api/users/signup")
+    .send({ email: "test@test.com" })
+    .expect(400)
+  await request(app)
+    .post("/api/users/signup")
+    .send({ password: "p" })
+    .expect(400)
+})
+
+it("not allows duplicate emails", async () => {
+  await request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test@test.com",
+      password: "password",
+    })
+    .expect(201)
+
+  await request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test@test.com",
+      password: "newPass",
+    })
+    .expect(400)
+})
+
+it('sets a cookie after successfull signup', async () => {
+  const response = await request(app)
+    .post("/api/users/signup")
+    .send({
+      email: "test@test.com",
+      password: "password",
+    })
+    .expect(201)
+
+  expect(response.get('Set-Cookie')).toBeDefined()
+})
