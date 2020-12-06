@@ -6,7 +6,7 @@ deploy:
       - ./infra/k8s/*
 build:
   local:
-    push: false # do not push to docker hub
+    push: false
   artifacts:
     - image: chandanky23/auth
       context: auth
