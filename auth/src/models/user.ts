@@ -39,12 +39,17 @@ const userSchema = new mongoose.Schema(
 )
 
 // Per-save hooks for password
-userSchema.pre("save", async function (done) {
-  if (this.isModified("password")) {
-    const hashed = await PasswordManager.hash(this.get("password"))
-    this.set("password", hashed)
+userSchema.pre("save", async function (next) {
+  let error: any
+  try {
+    if (this.isModified("password")) {
+      const hashed = await PasswordManager.hash(this.get("password"))
+      this.set("password", hashed)
+    }
+    return next(error)
+  } catch (err: any) {
+    return next(err)
   }
-  done()
 })
 
 // Ading method to a schema in mongoose using 'statics'
