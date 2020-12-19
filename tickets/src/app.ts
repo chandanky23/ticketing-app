@@ -2,7 +2,8 @@ import express from "express"
 import "express-async-errors"
 import { json } from "body-parser"
 import cookieSession from "cookie-session"
-import { errorHandler, NotFoundError } from "@ckytickets/common"
+import { errorHandler, NotFoundError, currentUser } from "@ckytickets/common"
+import { createTicketRouter } from "./routes/createTicket"
 
 const app = express()
 // We want express to trust our proxy coming over ingress-nginx using HTTPS
@@ -14,6 +15,9 @@ app.use(
     secure: process.env.NODE_ENV !== "test", // Must be 'true' for prod for all HTTPS calls else false as the calls will be http
   })
 )
+app.use(currentUser)
+
+app.use(createTicketRouter)
 
 app.all("*", async () => {
   throw new NotFoundError()
